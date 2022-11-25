@@ -138,14 +138,17 @@ class API():
     def requestHandler(self, url):
         i = 0
         found = False
+        #Tenta realizar a requisição 5 vezes
         while i < 5 and not found:
             try:
                 response = requests.get(url, headers = self.headers)
                 found = True
             except ConnectionError:
+                #Em caso de erro, aguarda 5 segundos e tenta novamente
                 time.sleep(5)
                 i += 1
-    
+
+        #Trata a response quando não for possível realizar a requisição
         if not found:
             response = None
 
@@ -162,21 +165,26 @@ class API():
         response = self.requestHandler(requestUrl)
 
         if response is not None:
-            #separa os dados dos generos cadastrados
+            # pega atributo "genres" do json
             genres = response.json().get("genres")
 
             # Itera sobre os generos verificando se já foram cadastrados e, caso não tenham sido, cadastra-os
             for genreJson in genres:
+                #formata os valores
                 self.formatResponseValues(genreJson)
 
+                # cria o objeto do tipo Genre
                 genreObj = Genre(id = int(genreJson.get("id")),
                             name = genreJson.get("name"))
 
+                # verifica se o genero já foi cadastrado
                 check = Database.selectGenre(genreObj.id)
                 genreName = genreObj.name
 
+                # se não foi cadastrado, inserimos
                 if not check:
                     Database.insert(genreObj)
+                # se foi cadastrado, printamos uma mensagem
                 else:
                     print(f"Gênero {genreName} já cadastrado!")
 
@@ -224,7 +232,8 @@ class API():
 
         if response is not None:
             reviews = response.json().get("results")
-                
+
+            #Demos o cast do "rating" para int 
             for reviewJson in reviews:
                 
                 if reviewJson.get("author_details").get("rating") is not None:
@@ -243,7 +252,7 @@ class API():
                 reviewId = reviewObj.id
 
                 if not check:
-                    movieObj = Database.selectMovie(int(movieId))
+                    movieObj = Database.selectMovie(int(movieId)) #seleciona o filme correspondente a essa review
                     reviewObj.movie = movieObj
                     Database.insert(reviewObj)
                 else:
@@ -280,7 +289,8 @@ class API():
             for castJson in cast:
 
                 self.formatResponseValues(castJson)
-            
+
+                #Insere na tabela de "people"
                 self.insertPerson(castJson)
                 
                 castObj = Tcast(id = castJson.get("credit_id"),
@@ -363,6 +373,7 @@ class API():
 
                         release_date = self.formatDate(movieJson.get("release_date"))
 
+                        #Tratamentos do revenue, budget e runtime, que em muitos casos vinham com valor 0
                         if int(movieJson.get("revenue")) == 0:
                             revenue = None
                         else:

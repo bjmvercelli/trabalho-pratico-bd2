@@ -6,6 +6,7 @@ from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
 metadata = Base.metadata
 
+# GERADO PELO MAPEAMENTO COM O SQLECODEGEN
 
 class Company(Base):
     __tablename__ = 'companies'

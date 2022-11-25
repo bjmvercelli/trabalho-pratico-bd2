@@ -4,16 +4,20 @@ from sqlalchemy.orm import sessionmaker
 from mapping import *
 
 class DAO():
+    #Criação da sessão com o banco de dados
     def getSession():
-        engine = create_engine("postgresql+psycopg2://postgres:root@localhost:5432/moviesDB")
+        engine = create_engine("postgresql+psycopg2://postgres:postgres@localhost:5432/moviesDB")
         Session = sessionmaker(bind=engine)
         session = Session()
         return session
     
+    #Método para inserir no banco
     def insert(session, obj):
         session.add(obj)
         
-        
+
+# DAO's para selects (por id)
+
 class DAOGenres:
     def select(session, id):
         genre = session.query(Genre).filter(Genre.id == id).first()
